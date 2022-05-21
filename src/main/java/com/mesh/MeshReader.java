@@ -66,7 +66,6 @@ public class MeshReader {
 		Array array = new Array(data);
 		Data sizeData = getData(text.childList.get(0));
 		int size = sizeData.intValue();
-		array.size = size;
 		if (size <= 0) {
 			return array;
 		}
@@ -326,7 +325,7 @@ public class MeshReader {
 		// 根据面重置定点信息
 		reset(faceList, pointList, textureList, normalList, subMeshList);
 
-		mesh.reset();
+		//mesh.reset();
 	}
 
 	private void reset(List<Face> faceList, List<Point> pointList, List<Texture> textureList, List<Normal> normalList,
@@ -461,31 +460,33 @@ public class MeshReader {
 
 	public static void main(String[] args) throws Exception {
 		// String meshFilePath = "D:\\data\\123\\body_Mesh_s.txt";
-		String meshFilePath = "D:\\data\\123\\body_Mesh.txt";
+		//String meshFilePath = "D:\\data\\123\\body_Mesh.txt";
+		String meshFilePath = "D:\\data\\123\\test\\123.txt";
 		MeshReader reader = new MeshReader(meshFilePath);
 		reader.reader();
-		reader.exportToObj("D:\\data\\123\\" + "body_Mesh_body.obj");
+		//reader.exportToObj("D:\\data\\123\\" + "body_Mesh_body.obj");
 		// System.out.println("ExportMesh over");
 //		System.out.println(reader.mesh.m_Indices.size());
 //		System.out.println(reader.mesh.m_VertexCount);
 //		System.out.println(reader.mesh.m_Vertices.size());
 //		System.out.println("-------------");
 		// reader.replace("D:\\data\\123\\max.obj");System.out.println("replace over");
-		reader.replace("D:\\data\\123\\modify.obj");
-		System.out.println("replace over");
+		//reader.replace("D:\\data\\123\\modify.obj");System.out.println("replace over");
+		//reader.mesh.reset();
 
 //		System.out.println(reader.mesh.m_Indices.size());
 //		System.out.println(reader.mesh.m_VertexCount);
 //		System.out.println(reader.mesh.m_Vertices.size());
 //		System.out.println("-------------");
 
-		// reader.saveText(reader.text);System.out.println("saveText over");
-
+		//reader.saveText(reader.text);System.out.println("saveText over");
+		//System.out.println(reader.data.getByName(meshFilePath));
+		
 		reader.saveData(reader.data);
 		System.out.println("saveData over");
 
-		// Draw draw = new Draw(reader.mesh);
-		// draw.starting();
+		Draw draw = new Draw(reader.mesh);
+		draw.starting();
 	}
 
 }

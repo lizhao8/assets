@@ -109,15 +109,17 @@ public class Draw extends JFrame
 //		gl.glEnd(); // Done Drawing The Quad
 
 		// 按面
-		/*gl.glColor3f(0f, 0f, 1f);
+		gl.glColor3f(0f, 0f, 1f);
 		gl.glBegin(GL2.GL_TRIANGLES);
 		System.err.println(mesh.m_Indices.size());
 		System.err.println(mesh.m_Vertices.size());
+		System.err.println("--------------");
 		for (int i = 0; i < mesh.m_Indices.size(); i += 3) {
-			int long1 = mesh.m_Indices.get(i+0).intValue();
+			int long3 = mesh.m_Indices.get(i+0).intValue();
 			int long2 = mesh.m_Indices.get(i+1).intValue();
-			int long3 = mesh.m_Indices.get(i+2).intValue();
-
+			int long1 = mesh.m_Indices.get(i+2).intValue();
+			//System.out.println(i/3+","+(long1+1)+","+(long2+1)+","+(long3+1));
+			//System.out.println(i+","+long1*3+","+long2*3+","+long3*3);
 			gl.glVertex3f(-mesh.m_Vertices.get(long1*3+0).value,
 					mesh.m_Vertices.get(long1*3+1).value,
 					mesh.m_Vertices.get(long1*3+2).value);
@@ -127,8 +129,8 @@ public class Draw extends JFrame
 			gl.glVertex3f(-mesh.m_Vertices.get(long3*3+0).value,
 					mesh.m_Vertices.get(long3*3+1).value,
 					mesh.m_Vertices.get(long3*3+2).value);
-		}*/
-
+		}
+/*
 		// 按元素
 		float r = 0;
 		float g = 0;
@@ -164,7 +166,7 @@ public class Draw extends JFrame
 		}
 		gl.glEnd();
 		gl.glFlush();
-		rquad += 1;
+		rquad += 1;*/
 	}
 
 	int index = 0;
@@ -246,7 +248,7 @@ public class Draw extends JFrame
 		this.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 		enableEvents(AWTEvent.WINDOW_EVENT_MASK);
 
-		final FPSAnimator animator = new FPSAnimator(glcanvas, 60, true);
+		final FPSAnimator animator = new FPSAnimator(glcanvas, 1, true);
 		animator.start();
 
 	}

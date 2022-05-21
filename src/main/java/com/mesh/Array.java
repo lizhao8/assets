@@ -4,8 +4,6 @@ import java.io.BufferedWriter;
 
 public class Array extends Data {
 
-	public int size;
-
 	public Array(Data data) {
 		super(data.parent);
 		super.index = data.index;
@@ -29,6 +27,7 @@ public class Array extends Data {
 			stringBuilder.append(" = ");
 			stringBuilder.append(value);
 		}
+		int size = childList.size();
 		stringBuilder.append(" (" + size + " items)");
 		writer.append(stringBuilder);
 		writer.newLine();
@@ -52,8 +51,8 @@ public class Array extends Data {
 
 	@Override
 	public String toString() {
-		return "Array [size=" + size + ", index=" + index + ", type=" + type + ", name=" + name + ", value=" + value
-				+ ", childList=" + childList + "]";
+		return "Array [size=" + childList.size() + ", index=" + index + ", type=" + type + ", name=" + name + ", value="
+				+ value + ", childList=" + childList + "]";
 	}
 
 }

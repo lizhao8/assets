@@ -79,8 +79,7 @@ public class Data {
 
 	@Override
 	public String toString() {
-		return "Data [index=" + index + ", type=" + type + ", name=" + name + ", value=" + value + ", childList="
-				+ childList + "]";
+		return value+"";
 	}
 
 	public void save(BufferedWriter writer) throws Exception {
