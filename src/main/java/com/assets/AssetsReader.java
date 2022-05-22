@@ -25,7 +25,7 @@ import net.jpountz.lz4.LZ4Factory;
 import net.jpountz.lz4.LZ4FastDecompressor;
 
 public class AssetsReader {
-	String sourceFile = "/4ddec4f0d2ffb3b6e02ac570ce400beb.ys";
+	String sourceFile = "/22b7302af3aa1076e75ebfda28bbe725.ys";
 	ByteReader reader;
 	Unity unity = new Unity();
 	List<Node> nodeList = new ArrayList<Node>();

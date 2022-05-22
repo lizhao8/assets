@@ -27,31 +27,19 @@ public class Data {
 		return Float.valueOf(value);
 		// return BitConverter.toFloat(longToBytes(Integer.valueOf(value), 4));
 	}
-/*
-	public byte[] longToBytes(long value, int length) {
-		String hexString = Long.toHexString(value);
-		byte[] byteArray = new byte[length];
-		for (int i = 0; i < length; i++) {
-			String hex = "";
-			if (hexString.length() == 0) {
-				break;
-			} else if (hexString.length() > 1) {
-				hex = hexString.substring(hexString.length() - 2, hexString.length());
-				if (hexString.length() == 2) {
-					hexString = "";
-				} else {
-					hexString = hexString.substring(0, hexString.length() - 2);
-				}
-			} else {
-				hex = hexString;
-				hexString = "";
-			}
-			byteArray[i] = (byte) Integer.parseInt(hex, 16);
-		}
 
-		return byteArray;
-	}
-*/
+	/*
+	 * public byte[] longToBytes(long value, int length) { String hexString =
+	 * Long.toHexString(value); byte[] byteArray = new byte[length]; for (int i = 0;
+	 * i < length; i++) { String hex = ""; if (hexString.length() == 0) { break; }
+	 * else if (hexString.length() > 1) { hex =
+	 * hexString.substring(hexString.length() - 2, hexString.length()); if
+	 * (hexString.length() == 2) { hexString = ""; } else { hexString =
+	 * hexString.substring(0, hexString.length() - 2); } } else { hex = hexString;
+	 * hexString = ""; } byteArray[i] = (byte) Integer.parseInt(hex, 16); }
+	 * 
+	 * return byteArray; }
+	 */
 	public Data parent;
 
 	public List<Data> childList = new ArrayList<Data>();
@@ -79,14 +67,17 @@ public class Data {
 
 	@Override
 	public String toString() {
-		return value+"";
+		return value + "";
 	}
 
 	public void save(BufferedWriter writer) throws Exception {
-		save(writer, 0);
+		save(writer, null, 0);
 	}
 
-	public void save(BufferedWriter writer, int deepAdd) throws Exception {
+	public void save(BufferedWriter writer, Data parent, int deepAdd) throws Exception {
+		if (deep == 0 && parent != null) {
+			deep = parent.deep + 1;
+		}
 		if (this instanceof Array) {
 			((Array) this).save(writer);
 			return;
@@ -108,7 +99,7 @@ public class Data {
 		writer.append(stringBuilder);
 		writer.newLine();
 		for (Data data : childList) {
-			data.save(writer, deepAdd);
+			data.save(writer, this, deepAdd);
 		}
 	}
 

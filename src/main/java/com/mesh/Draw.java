@@ -27,8 +27,6 @@ import com.jogamp.opengl.util.FPSAnimator;
 import com.jogl.base.Element;
 import com.jogl.base.Face;
 import com.jogl.base.Point;
-import com.mesh.data.Float;
-import com.mesh.data.Long;
 import com.mesh.data.Mesh;
 
 public class Draw extends JFrame
@@ -111,10 +109,10 @@ public class Draw extends JFrame
 		// 按面
 		gl.glColor3f(0f, 0f, 1f);
 		gl.glBegin(GL2.GL_TRIANGLES);
-		System.err.println(mesh.m_Indices.size());
-		System.err.println(mesh.m_Vertices.size());
-		System.err.println("--------------");
-		for (int i = 0; i < mesh.m_Indices.size(); i += 3) {
+		//System.err.println(mesh.m_Indices.size());
+		//System.err.println(mesh.m_Vertices.size());
+		//System.err.println("--------------");
+		/*for (int i = 0; i < mesh.m_Indices.size(); i += 3) {
 			int long3 = mesh.m_Indices.get(i+0).intValue();
 			int long2 = mesh.m_Indices.get(i+1).intValue();
 			int long1 = mesh.m_Indices.get(i+2).intValue();
@@ -130,7 +128,7 @@ public class Draw extends JFrame
 					mesh.m_Vertices.get(long3*3+1).value,
 					mesh.m_Vertices.get(long3*3+2).value);
 		}
-/*
+*/
 		// 按元素
 		float r = 0;
 		float g = 0;
@@ -164,9 +162,11 @@ public class Draw extends JFrame
 				}
 			}
 		}
+			
+		
 		gl.glEnd();
 		gl.glFlush();
-		rquad += 1;*/
+		rquad += 1;
 	}
 
 	int index = 0;
@@ -248,7 +248,7 @@ public class Draw extends JFrame
 		this.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 		enableEvents(AWTEvent.WINDOW_EVENT_MASK);
 
-		final FPSAnimator animator = new FPSAnimator(glcanvas, 1, true);
+		final FPSAnimator animator = new FPSAnimator(glcanvas, 300, true);
 		animator.start();
 
 	}

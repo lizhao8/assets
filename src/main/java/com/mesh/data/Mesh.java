@@ -158,6 +158,7 @@ public class Mesh {
 	}
 
 	public void reset() {
+
 		// data.getByName("m_Name").value=name;
 		Data m_VertexData = data.getByType("VertexData");
 		m_VertexData.getByName("m_VertexCount").value = m_VertexCount + "";
@@ -167,12 +168,17 @@ public class Mesh {
 		List<Data> m_IndexBuffer = new ArrayList<Data>();
 		data.getByName("m_IndexBuffer").get(0).childList = m_IndexBuffer;
 
-		//List<Data> m_SubMeshes = new ArrayList<Data>();
-		//data.getByName("m_SubMeshes").get(0).childList = m_SubMeshes;
+		// List<Data> m_SubMeshes = new ArrayList<Data>();
+		// data.getByName("m_SubMeshes").get(0).childList = m_SubMeshes;
 
 		for (Iterator<Long> iterator = m_Indices.iterator(); iterator.hasNext();) {
-			m_IndexBuffer.addAll(iterator.next().dataList);
+			m_IndexBuffer.addAll(iterator.next().dataList);			
 		}
+		/*for (int i = 0; i < 3000; i++) {
+			m_IndexBuffer.remove(m_IndexBuffer.size()-1);			
+		}		
+		subMeshList.get(1).setIndexCount(subMeshList.get(1).indexCount-3000);
+		*/
 		List<Channel> channelList = new ArrayList<Channel>();
 
 		for (int i = 0; i < m_Channels.size(); i++) {
@@ -231,9 +237,6 @@ public class Mesh {
 
 		Map<Integer, List<Channel>> streamChannelMap = channelList.stream()
 				.collect(Collectors.groupingBy(Channel::getStream, TreeMap::new, Collectors.toList()));
-
-		int index = 0;
-
 		for (Integer stream : streamChannelMap.keySet()) {
 			List<Channel> _channelList = streamChannelMap.get(stream);
 			for (int v = 0; v < m_VertexCount; v++) {
@@ -256,20 +259,28 @@ public class Mesh {
 					// System.out.println(channel.dimension + "," + componentByteSize + "," +
 					// channel.floatList.size());
 
-
 					for (int d = 0; d < channel.dimension; d++) {
-
 						List<Data> list = new ArrayList<Data>();
 
-						// for (int c = 0; c < componentByteSize; c++) {
-						Float float1 = channel.floatList.get(v*channel.dimension+d);
+						Float float1 = channel.floatList.get(v * channel.dimension + d);
+						// System.out.println(float1.dataList);
 						m_DataSize.addAll(float1.dataList);
-						// }
 
 					}
 
 				}
 			}
+		}
+		long size = m_DataSize.size();
+		size = (size + (16L - 1L)) & ~(16L - 1L);
+
+		for (int i = m_DataSize.size(); i < size; i++) {
+			Data data = new Data(null);
+			data.index = "0";
+			data.type = "UInt8";
+			data.name = "data";
+			data.value = "0";
+			m_DataSize.add(data);
 		}
 
 	}

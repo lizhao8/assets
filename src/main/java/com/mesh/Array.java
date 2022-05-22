@@ -45,7 +45,7 @@ public class Array extends Data {
 			stringBuilder.append("[" + i + "]");
 			writer.append(stringBuilder);
 			writer.newLine();
-			data.save(writer, 1);
+			data.save(writer,this, 1);
 		}
 	}
 

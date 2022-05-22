@@ -28,9 +28,10 @@ public class Long {
 	public Long(long value) {
 		super();
 		this.value = value;
-		byte[] bytes = _longToBytes(value, false);
+		byte[] bytes = _longToBytes(value,2, false);
 
-		for (byte b : bytes) {
+		for (int i = 0; i < bytes.length; i++) {
+			byte b = bytes[bytes.length-i-1];			
 			Data data = new Data(null);
 			data.index = "0";
 			data.type = "UInt8";
@@ -59,10 +60,10 @@ public class Long {
 		return value;
 	}
 
-	public static byte[] _longToBytes(long values, boolean u) {
-		byte[] buffer = new byte[8];
-		for (int i = 0; i < 8; i++) {
-			int offset = 64 - (i + 1) * 8;
+	public static byte[] _longToBytes(long values,int length, boolean u) {
+		byte[] buffer = new byte[length];
+		for (int i = 0; i < length; i++) {
+			int offset = 8*length - (i + 1) * 8;
 			buffer[i] = (byte) ((values >> offset) & 0xff);
 		}
 		return buffer;

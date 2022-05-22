@@ -31,7 +31,7 @@ public class VertexData {
 			}
 		}
 
-		if (version[0] < 5) // 5.0 down
+		/*if (version[0] < 5) // 5.0 down
 		{
 			if (version[0] < 4) {
 				m_Streams = new StreamInfo[4];
@@ -51,7 +51,8 @@ public class VertexData {
 		} else // 5.0 and up
 		{
 			GetStreams(version);
-		}
+		}*/
+		GetStreams(version);
 
 		m_DataSize = reader.readUInt8Array();
 		reader.alignStream();

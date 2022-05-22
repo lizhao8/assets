@@ -255,9 +255,9 @@ public class MeshReader {
 			int indexCount = (int) mesh.subMeshList.get(i).indexCount;
 			int end = sum + indexCount;
 			for (int f = sum; f < end; f += 3) {
-				long long1 = mesh.m_Indices.get(f + 2).value + 1;
+				long long1 = mesh.m_Indices.get(f + 0).value + 1;
 				long long2 = mesh.m_Indices.get(f + 1).value + 1;
-				long long3 = mesh.m_Indices.get(f + 0).value + 1;
+				long long3 = mesh.m_Indices.get(f + 2).value + 1;
 				appendFormat("f %s/%s/%s %s/%s/%s %s/%s/%s", long1, long1, long1, long2, long2, long2, long3, long3,
 						long3);
 			}
@@ -289,6 +289,7 @@ public class MeshReader {
 		List<Normal> normalList = new ArrayList<Normal>();
 		List<Face> faceList = new ArrayList<Face>();
 		List<SubMesh> subMeshList = new ArrayList<SubMesh>();
+		List<Texture> _textureList = new ArrayList<Texture>();
 
 		int subMeshIndex = 0;
 		SubMesh subMesh = null;
@@ -302,7 +303,7 @@ public class MeshReader {
 				pointList.add(new Point(line));
 			} else if (line.startsWith("vt")) {
 				line = line.replace("vt ", "");
-				textureList.add(new Texture(line));
+				textureList.add(new Texture(line));				
 			} else if (line.startsWith("vn")) {
 				line = line.replace("vn ", "");
 				normalList.add(new Normal(line));
@@ -312,6 +313,9 @@ public class MeshReader {
 				// subMesh = new SubMesh(sm);
 				subMeshList.add(subMesh);
 				subMeshIndex++;
+				//_textureList.addAll(textureList);
+				//textureList=_textureList;
+				//_textureList=new ArrayList<Texture>();
 			} else if (line.startsWith("f")) {
 				line = line.replace("f ", "");
 				Face face = new Face(line, subMesh);
@@ -359,15 +363,15 @@ public class MeshReader {
 			long a = allBuidingList.indexOf(face.getBuiding(0));
 			long b = allBuidingList.indexOf(face.getBuiding(1));
 			long c = allBuidingList.indexOf(face.getBuiding(2));
-			Set<java.lang.Long> set = new TreeSet<java.lang.Long>();
+			/*Set<java.lang.Long> set = new TreeSet<java.lang.Long>();
 			set.add(a);
 			set.add(b);
 			set.add(c);
 			List<java.lang.Long> list = new ArrayList<java.lang.Long>(set);
-			Collections.reverse(list);
+			//Collections.reverse(list);
 			a = list.get(0);
 			b = list.get(1);
-			c = list.get(2);
+			c = list.get(2);*/
 			face.a = a;
 			face.b = b;
 			face.c = c;
@@ -460,23 +464,26 @@ public class MeshReader {
 
 	public static void main(String[] args) throws Exception {
 		// String meshFilePath = "D:\\data\\123\\body_Mesh_s.txt";
-		//String meshFilePath = "D:\\data\\123\\body_Mesh.txt";
-		String meshFilePath = "D:\\data\\123\\test\\123.txt";
+		String meshFilePath = "D:\\data\\123\\body_Mesh.txt";
+		//String meshFilePath = "D:\\data\\123\\test\\123.txt";
 		MeshReader reader = new MeshReader(meshFilePath);
 		reader.reader();
-		//reader.exportToObj("D:\\data\\123\\" + "body_Mesh_body.obj");
-		// System.out.println("ExportMesh over");
+		reader.exportToObj("D:\\data\\123\\" + "body_Mesh_body.obj"); System.out.println("ExportMesh over");
 //		System.out.println(reader.mesh.m_Indices.size());
 //		System.out.println(reader.mesh.m_VertexCount);
 //		System.out.println(reader.mesh.m_Vertices.size());
+//		System.out.println(reader.mesh.m_Normals.size());
+//		System.out.println(reader.mesh.m_UV0.size());
 //		System.out.println("-------------");
-		// reader.replace("D:\\data\\123\\max.obj");System.out.println("replace over");
+		reader.replace("D:\\data\\123\\max.obj");System.out.println("replace over");
 		//reader.replace("D:\\data\\123\\modify.obj");System.out.println("replace over");
-		//reader.mesh.reset();
+		reader.mesh.reset();
 
 //		System.out.println(reader.mesh.m_Indices.size());
 //		System.out.println(reader.mesh.m_VertexCount);
 //		System.out.println(reader.mesh.m_Vertices.size());
+//		System.out.println(reader.mesh.m_Normals.size());
+//		System.out.println(reader.mesh.m_UV0.size());
 //		System.out.println("-------------");
 
 		//reader.saveText(reader.text);System.out.println("saveText over");
@@ -484,9 +491,11 @@ public class MeshReader {
 		
 		reader.saveData(reader.data);
 		System.out.println("saveData over");
+		
+		reader.exportToObj("D:\\data\\123\\" + "body_Mesh_body_new.obj");System.out.println("exportToObj over");
 
-		Draw draw = new Draw(reader.mesh);
-		draw.starting();
+		//Draw draw = new Draw(reader.mesh);
+		//draw.starting();
 	}
 
 }

@@ -135,10 +135,7 @@ public class Mesh extends java.lang.Object {
 			if (m_Use16BitIndices) {
 				m_IndexBuffer = new long[(int) (m_IndexBuffer_size / 2)];
 				for (int i = 0; i < m_IndexBuffer_size / 2; i++) {
-					m_IndexBuffer[i] = reader.readUInt16();
-					if(m_IndexBuffer[i]>=255) {
-						System.out.println(m_IndexBuffer[i]);
-					}
+					m_IndexBuffer[i] = reader.readUInt16();					
 				}
 				reader.alignStream();
 			} else {
