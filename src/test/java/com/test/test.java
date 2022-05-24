@@ -1,21 +1,28 @@
 package com.test;
 
-public class test {
+import com.tool.BitConverter;
 
+public class test {
+	/*
+	    0 UInt8 data = 254
+   [786805]
+    0 UInt8 data = 57
+   [786806]
+    0 UInt8 data = 159
+   [786807]
+    0 UInt8 data = 61
+	 
+	 */
 	public static void main(String[] args) {
-		byte[] bytes=new byte[]{
-				0,0,0,0,
-				0,0,0,1
-				};
-		long a=(0xffL & (long) bytes[7]) 
-		        | (0xff00L & ((long) bytes[6] << 8)) 
-		        | (0xff0000L & ((long) bytes[5] << 16))
-		        | (0xff000000L & ((long) bytes[4] << 24)) 
-		        | (0xff00000000L & ((long) bytes[3] << 32))
-		        | (0xff0000000000L & ((long) bytes[2] << 40)) 
-		        | (0xff000000000000L & ((long) bytes[1] << 48))
-		        | (0xff00000000000000L & ((long) bytes[0] << 56));
-		        System.out.println(a);
+		float a = (float) 0.3941699;
+		byte[] bytes = BitConverter.getBytes(a);
+		for (byte b : bytes) {
+			System.out.print(b + " ");
+		}
+		bytes[0] = (byte) 254;
+		float b = BitConverter.toFloat(bytes);
+		System.out.println(b);
 	}
+	
 
 }

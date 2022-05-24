@@ -12,6 +12,9 @@ public class Channel {
 	public int dimension;
 	public Data data;
 	List<Float> floatList;
+	public String type;
+	public int componentByteSize;
+
 
 	public Channel(Data data, int index) {
 		this.data = data;

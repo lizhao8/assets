@@ -8,20 +8,27 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import java.util.TreeSet;
 
-import com.assets.max.Buiding;
-import com.assets.max.SubMesh;
-import com.jogl.base.Element;
-import com.jogl.base.Face;
-import com.jogl.base.Normal;
-import com.jogl.base.Point;
-import com.jogl.base.Texture;
+import com.mesh.data.Channel;
+import com.mesh.data.Element;
+import com.mesh.data.Face;
 import com.mesh.data.Float;
+import com.mesh.data.Index;
 import com.mesh.data.Long;
 import com.mesh.data.Mesh;
+import com.mesh.data.Normal;
+import com.mesh.data.Point;
+import com.mesh.data.SubMesh;
+import com.mesh.data.Texture;
 import com.tool.BitConverter;
 
 public class MeshReader {
@@ -53,8 +60,8 @@ public class MeshReader {
 
 	}
 
-	private void saveData(Data data) throws Exception {
-		FileWriter fileWriter = new FileWriter(newMeshFilePath);
+	private void saveData(Data data, String filePath) throws Exception {
+		FileWriter fileWriter = new FileWriter(filePath);
 		BufferedWriter writer = new BufferedWriter(fileWriter);
 		data.save(writer);
 		writer.flush();
@@ -110,10 +117,8 @@ public class MeshReader {
 		return data;
 	}
 
-	String newMeshFilePath = "D:\\data\\123\\body_Mesh_new.txt";
-
-	private void saveText(Text text) throws Exception {
-		FileWriter fileWriter = new FileWriter(newMeshFilePath);
+	private void saveText(Text text, String filePath) throws Exception {
+		FileWriter fileWriter = new FileWriter(filePath);
 		BufferedWriter writer = new BufferedWriter(fileWriter);
 		text.save(writer);
 		writer.flush();
@@ -176,7 +181,12 @@ public class MeshReader {
 			floats[i] = params[i];
 		}
 		string = String.format(string, floats);
-		// System.out.println(string);
+		sb.append(string);
+		sb.append(System.getProperty("line.separator"));
+	}
+
+	private void appendFormat(String string, String... params) {
+		string = String.format(string, params);
 		sb.append(string);
 		sb.append(System.getProperty("line.separator"));
 	}
@@ -210,7 +220,7 @@ public class MeshReader {
 	}
 
 	public boolean exportToObj(String exportPath) {
-		if (mesh.m_VertexCount <= 0)
+		if (mesh.getVertexCount() <= 0)
 			return false;
 		sb = new StringBuilder();
 		appendLine("g " + mesh.name);
@@ -220,33 +230,33 @@ public class MeshReader {
 			return false;
 		}
 
-		for (int v = 0; v < mesh.m_VertexCount; v++) {
+		for (int v = 0; v < mesh.getVertexCount(); v++) {
 			int c = 3;
-			appendFormat("v %s %s %s", -mesh.m_Vertices.get(v * c + 0).value, mesh.m_Vertices.get(v * c + 1).value,
-					mesh.m_Vertices.get(v * c + 2).value);
-		}
-		// endregion
-
-		// region UV
-
-		if (mesh.m_UV0 != null && mesh.m_UV0.size() > 0) {
-			int c = 2;
-			for (int v = 0; v < mesh.m_VertexCount; v++) {
-				appendFormat("vt %s %s", mesh.m_UV0.get(v * c + 0).value, mesh.m_UV0.get(v * c + 1).value);
-			}
+			appendFormat("v  %s %s %s", mesh.m_Vertices.get(v * c + 0).stringValue(-1),
+					mesh.m_Vertices.get(v * c + 1).stringValue(), mesh.m_Vertices.get(v * c + 2).stringValue());
 		}
 		// endregion
 
 		// region Normals
 		if (mesh.m_Normals != null && mesh.m_Normals.size() > 0) {
 			int c = 3;
-			for (int v = 0; v < mesh.m_VertexCount; v++) {
-				appendFormat("vn %s %s %s", -mesh.m_Normals.get(v * c + 0).value, mesh.m_Normals.get(v * c + 1).value,
-						mesh.m_Normals.get(v * c + 2).value);
+			for (int v = 0; v < mesh.getVertexCount(); v++) {
+				appendFormat("vn %s %s %s", mesh.m_Normals.get(v * c + 0).stringValue(-1),
+						mesh.m_Normals.get(v * c + 1).stringValue(), mesh.m_Normals.get(v * c + 2).stringValue());
 			}
 		}
-
 		// endregion
+
+		// region UV
+		if (mesh.m_UV0 != null && mesh.m_UV0.size() > 0) {
+			int c = 2;
+			for (int v = 0; v < mesh.getVertexCount(); v++) {
+				appendFormat("vt %s %s", mesh.m_UV0.get(v * c + 0).stringValue(),
+						mesh.m_UV0.get(v * c + 1).stringValue());
+			}
+		}
+		// endregion
+
 		// BitConverter.byteOrder = ByteOrder.BIG_ENDIAN;
 		// region Face
 		int sum = 0;
@@ -263,7 +273,6 @@ public class MeshReader {
 			}
 			sum = end;
 		}
-
 		// endregion
 
 		try {
@@ -279,7 +288,7 @@ public class MeshReader {
 		return true;
 	}
 
-	private void replace(String objectPath) throws Exception {
+	public void replace(String objectPath) throws Exception {
 		FileReader fileReader = new FileReader(objectPath);
 		BufferedReader reader = new BufferedReader(fileReader);
 		String line = "";
@@ -290,7 +299,7 @@ public class MeshReader {
 		List<Face> faceList = new ArrayList<Face>();
 		List<SubMesh> subMeshList = new ArrayList<SubMesh>();
 		List<Texture> _textureList = new ArrayList<Texture>();
-
+		List<Normal> _normalList = new ArrayList<Normal>();
 		int subMeshIndex = 0;
 		SubMesh subMesh = null;
 		while (true) {
@@ -303,19 +312,25 @@ public class MeshReader {
 				pointList.add(new Point(line));
 			} else if (line.startsWith("vt")) {
 				line = line.replace("vt ", "");
-				textureList.add(new Texture(line));				
+				textureList.add(new Texture(line));
+				// _textureList.add(new Texture(line));
 			} else if (line.startsWith("vn")) {
 				line = line.replace("vn ", "");
 				normalList.add(new Normal(line));
+				// _normalList.add(new Normal(line));
 			} else if (line.startsWith("g")) {
 				line = reader.readLine();
 				subMesh = mesh.subMeshList.get(subMeshIndex);
 				// subMesh = new SubMesh(sm);
 				subMeshList.add(subMesh);
+				subMesh.faceList.clear();
 				subMeshIndex++;
-				//_textureList.addAll(textureList);
-				//textureList=_textureList;
-				//_textureList=new ArrayList<Texture>();
+				// _textureList.addAll(textureList);
+				// textureList=_textureList;
+				// _textureList=new ArrayList<Texture>();
+				// _normalList.addAll(normalList);
+				// normalList=_normalList;
+				// _normalList=new ArrayList<Normal>();
 			} else if (line.startsWith("f")) {
 				line = line.replace("f ", "");
 				Face face = new Face(line, subMesh);
@@ -328,93 +343,230 @@ public class MeshReader {
 
 		// 根据面重置定点信息
 		reset(faceList, pointList, textureList, normalList, subMeshList);
-
-		//mesh.reset();
 	}
 
 	private void reset(List<Face> faceList, List<Point> pointList, List<Texture> textureList, List<Normal> normalList,
 			List<SubMesh> subMeshList) {
+
+		// Set<Point> pointSet = new LinkedHashSet<Point>();
 		List<Point> _pointList = new ArrayList<Point>();
-		List<Texture> _textureList = new ArrayList<Texture>();
-		List<Point> _normalList = new ArrayList<Point>();
+
 		for (int i = 0; i < faceList.size(); i++) {
 			Face face = faceList.get(i);
-			face.addPoint(pointList.get(face.index1.v));
-			face.addPoint(pointList.get(face.index2.v));
-			face.addPoint(pointList.get(face.index3.v));
+			for (Index index : face._indexList) {
+				Point point = pointList.get(index.v);
+				point.index = index;
+				point.texture = textureList.get(index.vt);
+				point.normal = normalList.get(index.vn);
 
-			face.addTexture(textureList.get(face.index1.vt));
-			face.addTexture(textureList.get(face.index2.vt));
-			face.addTexture(textureList.get(face.index3.vt));
+				// pointSet.add(point);
+				int n = _pointList.indexOf(point);
+				if (n >= 0) {
+					point = _pointList.get(n);
+				} else {
+					_pointList.add(point);
+				}
 
-			face.addNormal(normalList.get(face.index1.vn));
-			face.addNormal(normalList.get(face.index2.vn));
-			face.addNormal(normalList.get(face.index3.vn));
-
-			face.addBuiding(new Buiding(face.getPoint(0), face.getTexture(0), face.getNormal(0)));
-			face.addBuiding(new Buiding(face.getPoint(1), face.getTexture(1), face.getNormal(1)));
-			face.addBuiding(new Buiding(face.getPoint(2), face.getTexture(2), face.getNormal(2)));
-		}
-		List<Buiding> allBuidingList = new ArrayList<>();
-		for (Face face : faceList) {
-			List<Buiding> buidingList = new ArrayList<Buiding>(face.buidingList);
-			buidingList.removeAll(allBuidingList);
-			allBuidingList.addAll(buidingList);
-			long a = allBuidingList.indexOf(face.getBuiding(0));
-			long b = allBuidingList.indexOf(face.getBuiding(1));
-			long c = allBuidingList.indexOf(face.getBuiding(2));
-			/*Set<java.lang.Long> set = new TreeSet<java.lang.Long>();
-			set.add(a);
-			set.add(b);
-			set.add(c);
-			List<java.lang.Long> list = new ArrayList<java.lang.Long>(set);
-			//Collections.reverse(list);
-			a = list.get(0);
-			b = list.get(1);
-			c = list.get(2);*/
-			face.a = a;
-			face.b = b;
-			face.c = c;
-
-			for (Buiding buiding : buidingList) {
-				_pointList.add(new Point(buiding.point.x, buiding.point.y, buiding.point.z));
-				_textureList.add(new Texture(buiding.texture.x, buiding.texture.y));
-				_normalList.add(new Point(buiding.normal.x, buiding.normal.y, buiding.normal.z));
+				face.addPoint(point);
 			}
 		}
-		mesh.m_VertexCount = pointList.size();
+
+		List<Texture> _textureList = new ArrayList<Texture>();
+		List<Normal> _normalList = new ArrayList<Normal>();
+
+		// List<Point> _pointList = new ArrayList<>(pointSet);
+		// 对原来的点和现在的点进行比较替换
+		Map<String, List<Point>> newPointMap = getPointMap(_pointList);
+		Map<String, List<Point>> oldPointMap = getPointMap(mesh.pointList);
+		replacePoint(newPointMap, oldPointMap, 5);
+
+		for (int i = 0; i < faceList.size(); i++) {
+
+			Face face = faceList.get(i);
+			for (Point point : face.pointList) {
+				face.indexList.add(new Long(_pointList.indexOf(point)));
+			}
+
+			/*
+			 * Face face = faceList.get(i); List<Long> list = new ArrayList<Long>(); for
+			 * (Point point : face.pointList) { list.add(new
+			 * Long(pointList.indexOf(point))); } Collections.reverse(list); for (Long long1
+			 * : list) { face.indexList.add(long1); }
+			 */
+		}
+
+		for (Point point : _pointList) {
+			_textureList.add(point.texture);
+			_normalList.add(point.normal);
+		}
+
+		/*
+		 * Set<Normal> _normalSet= new LinkedHashSet<Normal>(); for (Point point :
+		 * _pointList) { _textureList.add(point.texture); _normalSet.add(point.normal);
+		 * } _normalList = new ArrayList<Normal>(_normalSet);
+		 */
+
+		mesh.pointList = _pointList;
 		mesh.m_Vertices = pointToArray(_pointList);
 		mesh.m_UV0 = textureToArray(_textureList);
-		mesh.m_Normals = pointToArray(_normalList);
+		mesh.m_Normals = normalToArray(_normalList);
 		mesh.m_Indices = faceToList(faceList);
 		mesh.subMeshList = subMeshList;
 		mesh.faceList = faceList;
-		long firstByte = 0;
-		long firstVertex = 0;
-		for (SubMesh subMesh : subMeshList) {
-			subMesh.setIndexCount(subMesh.faceList.size() * 3);
-			subMesh.setFirstByte(firstByte);
-			long vertexCount = getVertexCount(subMesh.faceList);
-			subMesh.setVertexCount(vertexCount);
-			subMesh.setFirstVertex(firstVertex);
-			firstByte = subMesh.faceList.size() * 3 * 2;
-			firstVertex += vertexCount;
-		}
-		mesh.m_VertexCount = allBuidingList.size();
 
+		mesh.resetSubMesh();
 		// 根据面划分元素
 		mesh.elementList = partitionElement(faceList);
+		int count = 0;
+		for (Point point : mesh.pointList) {
+			if (point.floatMap.size() != 8) {
+				count++;
+			}
+		}
+		// System.out.println(all);
+		System.out.println(count);
 
 	}
 
-	private long getVertexCount(List<Face> faceList) {
-		List<Buiding> allBuidingList = new ArrayList<>();
-		for (Face face : faceList) {
-			List<Buiding> buidingList = face.buidingList;
-			buidingList.removeAll(allBuidingList);
-			allBuidingList.addAll(buidingList);
+	List<String> notReplaceList = new ArrayList<String>() {
+		{
+			add("m_Vertices");
+			add("m_Normals");
+			add("m_UV0");
 		}
-		return allBuidingList.size();
+	};
+
+	private void replacePoint(Map<String, List<Point>> newPointMap, Map<String, List<Point>> oldPointMap,
+			int accuracy) {
+		int all = 0;
+		// 创建映射map
+		for (Iterator<String> iterator = newPointMap.keySet().iterator(); iterator.hasNext();) {
+			String key = iterator.next();
+			List<Point> newList = newPointMap.get(key);
+			for (Iterator<Point> iterator2 = newList.iterator(); iterator2.hasNext();) {
+				Point newPoint = (Point) iterator2.next();
+				if (oldPointMap.containsKey(key)) {
+					List<Point> oldList = oldPointMap.get(key);
+					Point oldPoint = oldList.get(0);
+					for (Channel channel : oldPoint.floatMap.keySet()) {
+						if ("m_Vertices".equals(channel.type)) {
+							newPoint.floatMap.put(channel, newPoint.floatList);
+						} else if ("m_Normals".equals(channel.type)) {
+							newPoint.floatMap.put(channel, newPoint.normal.floatList);
+						} else if ("m_UV0".equals(channel.type)) {
+							newPoint.floatMap.put(channel, newPoint.texture.floatList);
+						} else {
+							newPoint.floatMap.put(channel, oldPoint.floatMap.get(channel));
+						}
+					}
+
+					all++;
+					oldList.remove(oldPoint);
+					iterator2.remove();
+					if (oldList.isEmpty()) {
+						oldPointMap.remove(key);
+					}
+					if (newList.isEmpty()) {
+						iterator.remove();
+					}
+				} else {
+					// System.err.println("不存在的点=" + key);
+				}
+			}
+
+		}
+		System.out.println(all);
+		System.out.println("newPointMap=");
+		System.out.println("oldPointMap=");
+		if (newPointMap.size() > 0) {
+			newPointMap = getPointMap(newPointMap, accuracy);
+			oldPointMap = getPointMap(oldPointMap, accuracy);
+			replacePoint(newPointMap, oldPointMap, --accuracy);
+		}
+	}
+
+	private Map<String, List<Point>> getPointMap(Map<String, List<Point>> pointMap, int accuracy) {
+		String zero = "0.";
+		for (int i = 0; i < accuracy; i++) {
+			zero += "0";
+		}
+		Map<String, List<Point>> newPointMap = new LinkedHashMap<String, List<Point>>();
+		for (Entry<String, List<Point>> entry : pointMap.entrySet()) {
+			List<Point> list = entry.getValue();
+			Point point = list.get(0);
+			StringBuilder stringBuilder = new StringBuilder();
+			for (Float float1 : point.floatList) {
+				stringBuilder.append(getStringValue(float1, accuracy, zero));
+				stringBuilder.append(" ");
+			}
+			stringBuilder.append("/");
+			for (Float float1 : point.texture.floatList) {
+				stringBuilder.append(getStringValue(float1, accuracy, zero));
+				stringBuilder.append(" ");
+			}
+			stringBuilder.append("/");
+			for (Float float1 : point.normal.floatList) {
+				stringBuilder.append(getStringValue(float1, accuracy, zero));
+				stringBuilder.append(" ");
+			}
+			String key = stringBuilder.toString();
+			if (newPointMap.containsKey(key)) {
+				newPointMap.get(key).addAll(list);
+			} else {
+				List<Point> _list = new ArrayList<Point>();
+				_list.addAll(list);
+				newPointMap.put(key, _list);
+			}
+		}
+		int count = 0;
+		for (List<Point> list : pointMap.values()) {
+			count += list.size();
+		}
+		System.out.println(count);
+		return newPointMap;
+	}
+
+	public String getStringValue(Float float1, int accuracy, String zero) {
+		String value = String.format("%." + accuracy + "f", float1.value);
+		if (("-" + zero).equals(value)) {
+			value = zero;
+		}
+		return value;
+	}
+
+	private Map<String, List<Point>> getPointMap(List<Point> pointList) {
+		Map<String, List<Point>> pointMap = new LinkedHashMap<String, List<Point>>();
+		for (Point point : pointList) {
+			StringBuilder stringBuilder = new StringBuilder();
+			for (Float float1 : point.floatList) {
+				stringBuilder.append(float1.stringValue());
+				stringBuilder.append(" ");
+			}
+			stringBuilder.append("/");
+			for (Float float1 : point.texture.floatList) {
+				stringBuilder.append(float1.stringValue());
+				stringBuilder.append(" ");
+			}
+			stringBuilder.append("/");
+			for (Float float1 : point.normal.floatList) {
+				stringBuilder.append(float1.stringValue());
+				stringBuilder.append(" ");
+			}
+			String key = stringBuilder.toString();
+			if (pointMap.containsKey(key)) {
+				pointMap.get(key).add(point);
+			} else {
+				List<Point> list = new ArrayList<Point>();
+				list.add(point);
+				pointMap.put(key, list);
+			}
+		}
+		int count = 0;
+		for (List<Point> list : pointMap.values()) {
+			count += list.size();
+		}
+		System.out.println(count);
+		return pointMap;
 	}
 
 	private List<Element> partitionElement(List<Face> _faceList) {
@@ -434,9 +586,16 @@ public class MeshReader {
 		List<Float> list = new ArrayList<Float>();
 		for (int i = 0; i < pointList.size(); i++) {
 			Point point = pointList.get(i);
-			list.add(new Float(point.x));
-			list.add(new Float(point.y));
-			list.add(new Float(point.z));
+			list.addAll(point.floatList);
+		}
+		return list;
+	}
+
+	public List<Float> normalToArray(List<Normal> normalList) {
+		List<Float> list = new ArrayList<Float>();
+		for (int i = 0; i < normalList.size(); i++) {
+			Normal normal = normalList.get(i);
+			list.addAll(normal.floatList);
 		}
 		return list;
 	}
@@ -445,8 +604,8 @@ public class MeshReader {
 		List<Float> list = new ArrayList<Float>();
 		for (int i = 0; i < textureList.size(); i++) {
 			Texture texture = textureList.get(i);
-			list.add(new Float(texture.x));
-			list.add(new Float(texture.y));
+			list.add(texture.x());
+			list.add(texture.y());
 		}
 		return list;
 	}
@@ -455,47 +614,44 @@ public class MeshReader {
 		List<Long> longList = new ArrayList<Long>();
 		for (int i = 0; i < faces.size(); i++) {
 			Face face = faces.get(i);
-			longList.add(new Long(face.a));
-			longList.add(new Long(face.b));
-			longList.add(new Long(face.c));
+			longList.add(face.indexList.get(0));
+			longList.add(face.indexList.get(1));
+			longList.add(face.indexList.get(2));
 		}
 		return longList;
 	}
 
 	public static void main(String[] args) throws Exception {
+
 		// String meshFilePath = "D:\\data\\123\\body_Mesh_s.txt";
 		String meshFilePath = "D:\\data\\123\\body_Mesh.txt";
-		//String meshFilePath = "D:\\data\\123\\test\\123.txt";
+		// String meshFilePath = "D:\\data\\123\\test\\123.txt";
 		MeshReader reader = new MeshReader(meshFilePath);
 		reader.reader();
-		reader.exportToObj("D:\\data\\123\\" + "body_Mesh_body.obj"); System.out.println("ExportMesh over");
-//		System.out.println(reader.mesh.m_Indices.size());
-//		System.out.println(reader.mesh.m_VertexCount);
-//		System.out.println(reader.mesh.m_Vertices.size());
-//		System.out.println(reader.mesh.m_Normals.size());
-//		System.out.println(reader.mesh.m_UV0.size());
-//		System.out.println("-------------");
-		reader.replace("D:\\data\\123\\max.obj");System.out.println("replace over");
-		//reader.replace("D:\\data\\123\\modify.obj");System.out.println("replace over");
+
+		reader.exportToObj("D:\\data\\123\\" + "body_Mesh_body.obj");
+		System.out.println("exportToObj over");
+
+		// String replaceFilePath = "D:\\data\\123\\max.obj";
+		// String replaceFilePath = "D:\\data\\123\\modify.obj";
+		String replaceFilePath = "D:\\data\\123\\max_test.obj";
+
+		reader.replace(replaceFilePath);
+		System.out.println("replace over");
 		reader.mesh.reset();
 
-//		System.out.println(reader.mesh.m_Indices.size());
-//		System.out.println(reader.mesh.m_VertexCount);
-//		System.out.println(reader.mesh.m_Vertices.size());
-//		System.out.println(reader.mesh.m_Normals.size());
-//		System.out.println(reader.mesh.m_UV0.size());
-//		System.out.println("-------------");
+		// reader.saveText(reader.text);System.out.println("saveText over");
+		// System.out.println(reader.data.getByName(meshFilePath));
+		String newMeshFilePath = "D:\\data\\123\\body_Mesh_new.txt";
 
-		//reader.saveText(reader.text);System.out.println("saveText over");
-		//System.out.println(reader.data.getByName(meshFilePath));
-		
-		reader.saveData(reader.data);
+		reader.saveData(reader.data, newMeshFilePath);
 		System.out.println("saveData over");
-		
-		reader.exportToObj("D:\\data\\123\\" + "body_Mesh_body_new.obj");System.out.println("exportToObj over");
 
-		//Draw draw = new Draw(reader.mesh);
-		//draw.starting();
+		reader.exportToObj("D:\\data\\123\\" + "body_Mesh_body_new.obj");
+		System.out.println("exportToObj over");
+
+		// Draw draw = new Draw(reader.mesh);
+		// draw.starting();
 	}
 
 }

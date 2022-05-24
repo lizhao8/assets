@@ -24,10 +24,10 @@ import com.jogamp.opengl.GLProfile;
 import com.jogamp.opengl.awt.GLCanvas;
 import com.jogamp.opengl.glu.GLU;
 import com.jogamp.opengl.util.FPSAnimator;
-import com.jogl.base.Element;
-import com.jogl.base.Face;
-import com.jogl.base.Point;
+import com.mesh.data.Element;
+import com.mesh.data.Face;
 import com.mesh.data.Mesh;
+import com.mesh.data.Point;
 
 public class Draw extends JFrame
 		implements GLEventListener, MouseListener, MouseMotionListener, MouseWheelListener, KeyListener {
@@ -147,7 +147,7 @@ public class Draw extends JFrame
 
 			for (Face face : element.faceList) {
 				for (Point point : face.pointList) {
-					gl.glVertex3f(-point.x, point.y, point.z);
+					gl.glVertex3f(-point.x().value, point.y().value, point.z().value);
 				}
 			}
 			if (b < 1) {

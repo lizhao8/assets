@@ -3,11 +3,12 @@ package com.mesh.data;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 
 import com.mesh.Data;
 import com.tool.BitConverter;
 
-public class Long {
+public class Long implements Comparable<Long> {
 	public List<Data> dataList = new ArrayList<Data>();
 	public long value;
 
@@ -28,10 +29,10 @@ public class Long {
 	public Long(long value) {
 		super();
 		this.value = value;
-		byte[] bytes = _longToBytes(value,2, false);
+		byte[] bytes = _longToBytes(value, 2, false);
 
 		for (int i = 0; i < bytes.length; i++) {
-			byte b = bytes[bytes.length-i-1];			
+			byte b = bytes[bytes.length - i - 1];
 			Data data = new Data(null);
 			data.index = "0";
 			data.type = "UInt8";
@@ -60,13 +61,36 @@ public class Long {
 		return value;
 	}
 
-	public static byte[] _longToBytes(long values,int length, boolean u) {
+	public static byte[] _longToBytes(long values, int length, boolean u) {
 		byte[] buffer = new byte[length];
 		for (int i = 0; i < length; i++) {
-			int offset = 8*length - (i + 1) * 8;
+			int offset = 8 * length - (i + 1) * 8;
 			buffer[i] = (byte) ((values >> offset) & 0xff);
 		}
 		return buffer;
+	}
+
+	@Override
+	public int hashCode() {
+		return Objects.hash(value);
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		Long other = (Long) obj;
+		return value == other.value;
+	}
+
+	@Override
+	public int compareTo(Long o) {
+
+		return (int) (this.value - o.value);
 	}
 
 }
