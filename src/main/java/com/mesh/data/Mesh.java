@@ -207,18 +207,18 @@ public class Mesh {
 						if (channel.floatList.isEmpty()) {
 							continue;
 						}
-						
+
 						List<Float> list = new ArrayList<Float>();
 						for (int d = 0; d < channel.dimension; d++) {
 							list.add(channel.floatList.get(index.intValue() * channel.dimension + d));
 							// System.out.println(channel.type+","+channel.floatList.size()+","+(index.intValue()*channel.dimension
 							// + d));
 						}
-						//m_Normals m_UV0
-						if("m_Normals".equals(channel.type)) {
-							point.normal=new Normal(list.get(0),list.get(1), list.get(2));
-						}else if("m_UV0".equals(channel.type)) {
-							point.texture=new Texture(list.get(0),list.get(1));
+						// m_Normals m_UV0
+						if ("m_Normals".equals(channel.type)) {
+							point.normal = new Normal(list.get(0), list.get(1), list.get(2));
+						} else if ("m_UV0".equals(channel.type)) {
+							point.texture = new Texture(list.get(0), list.get(1));
 						}
 						point.floatMap.put(channel, list);
 					}
@@ -293,13 +293,13 @@ public class Mesh {
 			m_IndexBuffer.addAll(iterator.next().dataList);
 		}
 
-		/*for (int i = 0; i < 3000; i++) {
-			m_IndexBuffer.remove(m_IndexBuffer.size() - 1);
-		}
-		
-		subMeshList.get(1).setIndexCount(subMeshList.get(1).indexCount - 3000);
+		/*
+		 * for (int i = 0; i < 3000; i++) { m_IndexBuffer.remove(m_IndexBuffer.size() -
+		 * 1); }
+		 * 
+		 * subMeshList.get(1).setIndexCount(subMeshList.get(1).indexCount - 3000);
 		 */
-		
+
 		for (Channel channel : channelList) {
 
 			switch (channel.index) {
@@ -353,50 +353,34 @@ public class Mesh {
 				throw new RuntimeException("m_Channel");
 			}
 		}
-
 		for (Integer stream : streamChannelMap.keySet()) {
 			List<Channel> _channelList = streamChannelMap.get(stream);
-			/*for (int v = 0; v < getVertexCount(); v++) {
-				for (Channel channel : _channelList) {
-					if (channel.dimension == 0) {
-						continue;
-					}
-					if (channel.floatList.isEmpty()) {
-						continue;
-					}
-					for (int d = 0; d < channel.dimension; d++) {
-						List<Data> list = new ArrayList<Data>();
-						Float float1 = channel.floatList.get(v * channel.dimension + d);
-						m_DataSize.addAll(float1.dataList);
-					}
-				}
-			}*/
+			
 			for (Point point : pointList) {
 				for (Channel channel : _channelList) {
 					if (channel.dimension == 0) {
 						continue;
 					}
-					System.out.println(channel.type);
-					List<Float> floatList= point.floatMap.get(channel);
-					System.out.println(floatList);
+					List<Float> floatList = point.floatMap.get(channel);
 					for (Float float1 : floatList) {
 						m_DataSize.addAll(float1.dataList);
 					}
 				}
+
+			}
+			long size = m_DataSize.size();
+			size = (size + (16L - 1L)) & ~(16L - 1L);
+
+			for (int i = m_DataSize.size(); i < size; i++) {
+				Data data = new Data(null);
+				data.index = "0";
+				data.type = "UInt8";
+				data.name = "data";
+				data.value = "0";
+				m_DataSize.add(data);
 			}
 		}
 
-		long size = m_DataSize.size();
-		size = (size + (16L - 1L)) & ~(16L - 1L);
-
-		for (int i = m_DataSize.size(); i < size; i++) {
-			Data data = new Data(null);
-			data.index = "0";
-			data.type = "UInt8";
-			data.name = "data";
-			data.value = "0";
-			m_DataSize.add(data);
-		}
 		resetSubMesh();
 
 		printChannal("reset over");

@@ -23,6 +23,10 @@ public class Data {
 		return Integer.valueOf(value);
 	}
 
+	public int longValue() {
+		return Integer.valueOf(value);
+	}
+
 	public float floatValue() {
 		return Float.valueOf(value);
 		// return BitConverter.toFloat(longToBytes(Integer.valueOf(value), 4));
@@ -91,7 +95,18 @@ public class Data {
 		stringBuilder.append(type);
 		stringBuilder.append(" ");
 		stringBuilder.append(name);
+
 		if (value != null && !"".equals(value)) {
+			if (value.startsWith("-")&&"UInt8".equals(type)) {
+				try {
+					byte b = Byte.valueOf(value);
+					if (((int) b) < 0) {
+						value = (b & 0xff) + "";
+					}
+				} catch (Exception e) {
+					//System.out.println(value);
+				}
+			}
 			stringBuilder.append(" = ");
 			stringBuilder.append(value);
 		}
